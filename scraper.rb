@@ -23,11 +23,21 @@ end
 
 agent = Mechanize.new
 
-vote_event_url = "http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_golos?g_id=3106"
+base_url = "http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_golos?g_id="
+vote_event_id = "3106"
+vote_event_url = base_url + vote_event_id
 puts "Fetching vote event page: #{vote_event_url}"
 vote_event_page = agent.get(vote_event_url)
 
-# TODO: Save vote_event data
+vote_event = {
+  # Setting this to what EveryPolitician is generating. Maybe it's wrong?
+  organization_id: "legislature",
+  identifier: vote_event_id,
+  # TODO: title: "foobar",
+  # TODO: start_date: "2013-10-09T18:53:09Z",
+  # TODO: result: "fail"
+}
+ScraperWiki::save_sqlite([:identifier], vote_event, :vote_events)
 
 # Vote results by faction
 vote_event_page.search("#01 ul.fr > li").each do |faction|
