@@ -33,7 +33,7 @@ vote_event = {
   # Setting this to what EveryPolitician is generating. Maybe it's wrong?
   organization_id: "legislature",
   identifier: vote_event_id,
-  # TODO: title: "foobar",
+  title: vote_event_page.at(".head_gol font").text.strip,
   # TODO: start_date: "2013-10-09T18:53:09Z",
   # TODO: result: "fail"
 }
