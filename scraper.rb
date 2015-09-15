@@ -1,6 +1,24 @@
 require 'scraperwiki'
 require 'mechanize'
 
+# Convert Ukrainian vote string to Popolo vote option string
+def ua_vote_to_popolo_option(string)
+  case string
+  when "За"
+    "yes"
+  when "Проти"
+    "no"
+  when "Утрималися"
+    "abstain"
+  when "Не голосували"
+    "not voting"
+  when "Відсутні"
+    "absent"
+  else
+    raise "Unknown vote option: #{string}"
+  end
+end
+
 agent = Mechanize.new
 
 vote_event_url = "http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_golos?g_id=3106"
