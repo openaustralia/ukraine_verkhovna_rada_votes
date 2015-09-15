@@ -19,6 +19,8 @@ def ua_vote_to_popolo_option(string)
   end
 end
 
+# TODO: ScraperWiki::sqliteexecute("BEGIN TRANSACTION")
+
 agent = Mechanize.new
 
 vote_event_url = "http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_golos?g_id=3106"
@@ -41,3 +43,5 @@ vote_event_page.search("#01 ul.fr > li").each do |faction|
     }
   end
 end
+
+# TODO: ScraperWiki::sqliteexecute("COMMIT")
