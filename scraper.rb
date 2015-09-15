@@ -4,6 +4,7 @@ require 'mechanize'
 agent = Mechanize.new
 
 vote_event_url = "http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_golos?g_id=3106"
+puts "Fetching vote event page: #{vote_event_url}"
 vote_event_page = agent.get(vote_event_url)
 
 # TODO: Save vote_event data
