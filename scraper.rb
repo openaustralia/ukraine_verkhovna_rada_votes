@@ -55,12 +55,15 @@ ScraperWiki::save_sqlite([:identifier], vote_event, :vote_events)
 vote_event_page.search("#01 ul.fr > li").each do |faction|
   faction_name = faction.at(:b).inner_text
 
+  puts "Saving votes for faction: #{faction}"
   faction.search(:li).each do |li|
+    voter_name = li.at(".dep").text
+    puts "Saving vote by #{voter_name}..."
+
     vote = {
       vote_event_id: vote_event_id,
       # TODO: Replace name with this
       # voter_id: "john-q-public",
-      name: li.at(".dep").text,
       option: ua_vote_to_popolo_option(li.at(".golos").text)
     }
     # TODO: ScraperWiki::save_sqlite([:vote_event_id, :voter_id], vote, :votes)
