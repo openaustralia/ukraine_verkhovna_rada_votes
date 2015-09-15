@@ -56,9 +56,9 @@ vote_event_page.search("#01 ul.fr > li").each do |faction|
   faction_name = faction.at(:b).inner_text
 
   faction.search(:li).each do |li|
-    p vote = {
-      # TODO: Fill out these values correctly, replacing "name"
-      # vote_event_id: "vote-42",
+    vote = {
+      vote_event_id: vote_event_id,
+      # TODO: Replace name with this
       # voter_id: "john-q-public",
       name: li.at(".dep").text,
       option: ua_vote_to_popolo_option(li.at(".golos").text)
