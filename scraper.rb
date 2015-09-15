@@ -30,7 +30,19 @@ def ua_result_to_popolo(string)
   end
 end
 
-# TODO: ScraperWiki::sqliteexecute("BEGIN TRANSACTION")
+def morph_scraper_query(scraper_name, query)
+  url = "https://api.morph.io/#{scraper_name}/data.json?key=#{ENV['MORPH_API_KEY']}&query=#{CGI.escape(query)}"
+  JSON.parse(open(url).read)
+end
+
+def full_name_to_abbreviated(full_name)
+  parts = full_name.split
+  # On the site the last initial becomes a blank space if they don't have a middle name
+  last_initial = parts[2] ? parts[2][0] : " "
+  "#{parts[0]} #{parts[1][0]}.#{last_initial}."
+end
+
+ScraperWiki::sqliteexecute("BEGIN TRANSACTION")
 
 agent = Mechanize.new
 
@@ -55,19 +67,27 @@ ScraperWiki::save_sqlite([:identifier], vote_event, :vote_events)
 vote_event_page.search("#01 ul.fr > li").each do |faction|
   faction_name = faction.at(:b).inner_text
 
-  puts "Saving votes for faction: #{faction}"
+  puts "Fetching deputy IDs from morph.io for faction: #{faction_name}"
+  name_ids = morph_scraper_query("openaustralia/ukraine_verkhovna_rada_deputies", "select name, id from 'data' where faction='#{faction_name}'")
+  p name_ids # TODO: Remove debugging
+
+  puts "Saving votes for faction: #{faction_name}"
   faction.search(:li).each do |li|
-    voter_name = li.at(".dep").text
+    voter_name = li.at(".dep").text.gsub("’", "'")
     puts "Saving vote by #{voter_name}..."
+
+    # FIXME: This isn't working yet
+    # The current problem I have is that we're not yet scraping historical faction data.
+    # This means that the name/faction thing doesn't match up
+    voter_id = name_ids.find { |r| full_name_to_abbreviated(r["name"]) == voter_name }["id"]
 
     vote = {
       vote_event_id: vote_event_id,
-      # TODO: Replace name with this
-      # voter_id: "john-q-public",
+      voter_id: voter_id,
       option: ua_vote_to_popolo_option(li.at(".golos").text)
     }
-    # TODO: ScraperWiki::save_sqlite([:vote_event_id, :voter_id], vote, :votes)
+    ScraperWiki::save_sqlite([:vote_event_id, :voter_id], vote, :votes)
   end
 end
 
-# TODO: ScraperWiki::sqliteexecute("COMMIT")
+ScraperWiki::sqliteexecute("COMMIT")
