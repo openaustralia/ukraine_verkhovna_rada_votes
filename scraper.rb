@@ -34,7 +34,8 @@ vote_event = {
   organization_id: "legislature",
   identifier: vote_event_id,
   title: vote_event_page.at(".head_gol font").text.strip,
-  # TODO: start_date: "2013-10-09T18:53:09Z",
+  # TODO: Do we need to worry about time zone?
+  start_date: DateTime.parse(vote_event_page.at(".head_gol").search(:br).first.next.text)
   # TODO: result: "fail"
 }
 ScraperWiki::save_sqlite([:identifier], vote_event, :vote_events)
