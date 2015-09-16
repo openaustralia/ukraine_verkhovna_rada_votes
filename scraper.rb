@@ -45,8 +45,22 @@ def full_name_to_abbreviated(full_name)
   "#{parts[0]} #{parts[1][0]}.#{last_initial}."
 end
 
-def name_to_id(abbreviated_name, name_ids)
-  name_ids.find { |r| full_name_to_abbreviated(r["name"]) == abbreviated_name }["id"]
+def name_to_id(abbreviated_name, faction_name)
+  # Special case for 2 people with the same abbreviated name
+  # TODO: Remove this hardcoded exception
+  if abbreviated_name == "Тимошенко Ю.В."
+    case faction_name
+    when 'Фракція політичної партії "Всеукраїнське об’єднання "Батьківщина"'
+      "1792"
+    when 'Фракція  Політичної партії "НАРОДНИЙ ФРОНТ"'
+      "18141"
+    else
+      raise faction_name
+    end
+  else
+    @name_ids ||= morph_scraper_query("openaustralia/ukraine_verkhovna_rada_deputies", "select name, id from 'data'")
+    @name_ids.find { |r| full_name_to_abbreviated(r["name"]) == abbreviated_name }["id"]
+  end
 end
 
 ScraperWiki::sqliteexecute("BEGIN TRANSACTION")
@@ -74,18 +88,12 @@ ScraperWiki::save_sqlite([:identifier], vote_event, :vote_events)
 vote_event_page.search("#01 ul.fr > li").each do |faction|
   faction_name = faction.at(:b).inner_text
 
-  name_ids = morph_scraper_query("openaustralia/ukraine_verkhovna_rada_deputies", "select name, id from 'data' where faction='#{faction_name}'")
-  p name_ids # TODO: Remove debugging
-
   puts "Saving votes for faction: #{faction_name}"
   faction.search(:li).each do |li|
     voter_name = li.at(".dep").text.gsub("’", "'")
     puts "Saving vote by #{voter_name}..."
 
-    # FIXME: This isn't working yet
-    # The current problem I have is that we're not yet scraping historical faction data.
-    # This means that the name/faction thing doesn't match up
-    voter_id = name_to_id(voter_name, name_ids)
+    voter_id = name_to_id(voter_name, faction_name)
 
     vote = {
       vote_event_id: vote_event_id,
