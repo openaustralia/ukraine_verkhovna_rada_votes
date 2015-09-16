@@ -1,5 +1,7 @@
 require 'scraperwiki'
 require 'mechanize'
+require 'open-uri'
+require 'json'
 
 # Convert Ukrainian vote string to Popolo vote option string
 def ua_vote_to_popolo_option(string)
