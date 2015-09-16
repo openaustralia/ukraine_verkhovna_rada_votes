@@ -55,7 +55,7 @@ def name_to_id(abbreviated_name, faction_name)
     when 'Фракція  Політичної партії "НАРОДНИЙ ФРОНТ"'
       "18141"
     else
-      raise faction_name
+      raise "Unknown faction for special case person #{abbreviated_name}: #{faction_name}"
     end
   else
     @name_ids ||= morph_scraper_query("openaustralia/ukraine_verkhovna_rada_deputies", "select name, id from 'data'")
