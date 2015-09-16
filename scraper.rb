@@ -33,6 +33,7 @@ def ua_result_to_popolo(string)
 end
 
 def morph_scraper_query(scraper_name, query)
+  puts "Querying morph.io scraper, #{scraper_name}, for: #{query}"
   url = "https://api.morph.io/#{scraper_name}/data.json?key=#{ENV['MORPH_API_KEY']}&query=#{CGI.escape(query)}"
   JSON.parse(open(url).read)
 end
@@ -73,7 +74,6 @@ ScraperWiki::save_sqlite([:identifier], vote_event, :vote_events)
 vote_event_page.search("#01 ul.fr > li").each do |faction|
   faction_name = faction.at(:b).inner_text
 
-  puts "Fetching deputy IDs from morph.io for faction: #{faction_name}"
   name_ids = morph_scraper_query("openaustralia/ukraine_verkhovna_rada_deputies", "select name, id from 'data' where faction='#{faction_name}'")
   p name_ids # TODO: Remove debugging
 
