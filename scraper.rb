@@ -44,6 +44,10 @@ def full_name_to_abbreviated(full_name)
   "#{parts[0]} #{parts[1][0]}.#{last_initial}."
 end
 
+def name_to_id(abbreviated_name, name_ids)
+  name_ids.find { |r| full_name_to_abbreviated(r["name"]) == abbreviated_name }["id"]
+end
+
 ScraperWiki::sqliteexecute("BEGIN TRANSACTION")
 
 agent = Mechanize.new
@@ -81,7 +85,7 @@ vote_event_page.search("#01 ul.fr > li").each do |faction|
     # FIXME: This isn't working yet
     # The current problem I have is that we're not yet scraping historical faction data.
     # This means that the name/faction thing doesn't match up
-    voter_id = name_ids.find { |r| full_name_to_abbreviated(r["name"]) == voter_name }["id"]
+    voter_id = name_to_id(voter_name, name_ids)
 
     vote = {
       vote_event_id: vote_event_id,
