@@ -78,7 +78,6 @@ vote_event = {
   organization_id: "legislature",
   identifier: vote_event_id,
   title: vote_event_page.at(".head_gol font").text.strip,
-  # TODO: Do we need to worry about time zone?
   start_date: DateTime.parse(vote_event_page.at(".head_gol").search(:br).first.next.text),
   result: ua_result_to_popolo(vote_event_page.search(".head_gol font").last.text)
 }
