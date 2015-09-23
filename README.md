@@ -8,4 +8,11 @@ It saves data to morph.io in a flat format that can be converted easily into [Po
 
 All these URLs have obvious IDs you can change to get other pages:
 
-* Vote event detail page: http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_golos?g_id=3106
+* Calendar of sitting days: http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_el_h
+* That loads this via AJAX for each session (the `nom_s` parameter is the session number): http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_el_l?nom_s=3&ss=3
+
+* Plenary session day
+** With no votes: http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_el_h2?data=01092015&nom_s=3
+** With votes: http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_el_h2?data=02092015&nom_s=3
+
+* Vote event detail page: http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_golos?g_id=3479
