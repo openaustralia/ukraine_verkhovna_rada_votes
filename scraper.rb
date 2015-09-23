@@ -63,45 +63,48 @@ def name_to_id(abbreviated_name, faction_name)
   end
 end
 
-ScraperWiki::sqliteexecute("BEGIN TRANSACTION")
+def scrape_vote_event(vote_event_id)
+  ScraperWiki::sqliteexecute("BEGIN TRANSACTION")
 
-agent = Mechanize.new
+  agent = Mechanize.new
 
-base_url = "http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_golos?g_id="
-vote_event_id = "3106"
-vote_event_url = base_url + vote_event_id
-puts "Fetching vote event page: #{vote_event_url}"
-vote_event_page = agent.get(vote_event_url)
+  base_url = "http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_golos?g_id="
+  vote_event_url = base_url + vote_event_id
+  puts "Fetching vote event page: #{vote_event_url}"
+  vote_event_page = agent.get(vote_event_url)
 
-vote_event = {
-  # Setting this to what EveryPolitician is generating. Maybe it's wrong?
-  organization_id: "legislature",
-  identifier: vote_event_id,
-  title: vote_event_page.at(".head_gol font").text.strip,
-  start_date: DateTime.parse(vote_event_page.at(".head_gol").search(:br).first.next.text),
-  result: ukrainian_result_to_popolo(vote_event_page.search(".head_gol font").last.text),
-  source_url: vote_event_url
-}
-ScraperWiki::save_sqlite([:identifier], vote_event, :vote_events)
+  vote_event = {
+    # Setting this to what EveryPolitician is generating. Maybe it's wrong?
+    organization_id: "legislature",
+    identifier: vote_event_id,
+    title: vote_event_page.at(".head_gol font").text.strip,
+    start_date: DateTime.parse(vote_event_page.at(".head_gol").search(:br).first.next.text),
+    result: ukrainian_result_to_popolo(vote_event_page.search(".head_gol font").last.text),
+    source_url: vote_event_url
+  }
+  ScraperWiki::save_sqlite([:identifier], vote_event, :vote_events)
 
-# Vote results by faction
-vote_event_page.search("#01 ul.fr > li").each do |faction|
-  faction_name = faction.at(:b).inner_text
+  # Vote results by faction
+  vote_event_page.search("#01 ul.fr > li").each do |faction|
+    faction_name = faction.at(:b).inner_text
 
-  puts "Saving votes for faction: #{faction_name}"
-  faction.search(:li).each do |li|
-    voter_name = li.at(".dep").text.gsub("’", "'")
-    puts "Saving vote by #{voter_name}..."
+    puts "Saving votes for faction: #{faction_name}"
+    faction.search(:li).each do |li|
+      voter_name = li.at(".dep").text.gsub("’", "'")
+      puts "Saving vote by #{voter_name}..."
 
-    voter_id = name_to_id(voter_name, faction_name)
+      voter_id = name_to_id(voter_name, faction_name)
 
-    vote = {
-      vote_event_id: vote_event_id,
-      voter_id: voter_id,
-      option: ukrainian_vote_to_popolo_option(li.at(".golos").text)
-    }
-    ScraperWiki::save_sqlite([:vote_event_id, :voter_id], vote, :votes)
+      vote = {
+        vote_event_id: vote_event_id,
+        voter_id: voter_id,
+        option: ukrainian_vote_to_popolo_option(li.at(".golos").text)
+      }
+      ScraperWiki::save_sqlite([:vote_event_id, :voter_id], vote, :votes)
+    end
   end
+
+  ScraperWiki::sqliteexecute("COMMIT")
 end
 
-ScraperWiki::sqliteexecute("COMMIT")
+scrape_vote_event "3106"
