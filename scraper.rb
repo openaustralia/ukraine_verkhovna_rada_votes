@@ -126,9 +126,19 @@ end
 
 @agent = Mechanize.new
 
-most_recent_votes_date = Date.parse(ScraperWiki.select("start_date FROM vote_events ORDER BY start_date DESC LIMIT 1").first["start_date"])
+start_date = if ENV["MORPH_START_DATE"]
+  Date.parse(ENV["MORPH_START_DATE"])
+else
+  begin
+    Date.parse(ScraperWiki.select("start_date FROM vote_events ORDER BY start_date DESC LIMIT 1").first["start_date"])
+  rescue SqliteMagic::NoSuchTable
+    raise "No scraped votes found. Set MORPH_START_DATE to tell me what date to start scraping from."
+  end
+end
 
-(most_recent_votes_date..Date.today).each do |date|
+(start_date..Date.today).each do |date|
   puts "Checking for votes on: #{date}"
   scrape_sitting_date(date)
 end
+
+puts "All done."
