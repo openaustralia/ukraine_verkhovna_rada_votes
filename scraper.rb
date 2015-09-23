@@ -66,12 +66,10 @@ end
 def scrape_vote_event(vote_event_id)
   ScraperWiki::sqliteexecute("BEGIN TRANSACTION")
 
-  agent = Mechanize.new
-
   base_url = "http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_golos?g_id="
   vote_event_url = base_url + vote_event_id
   puts "Fetching vote event page: #{vote_event_url}"
-  vote_event_page = agent.get(vote_event_url)
+  vote_event_page = @agent.get(vote_event_url)
 
   vote_event = {
     # Setting this to what EveryPolitician is generating. Maybe it's wrong?
@@ -107,4 +105,18 @@ def scrape_vote_event(vote_event_id)
   ScraperWiki::sqliteexecute("COMMIT")
 end
 
-scrape_vote_event "3106"
+@agent = Mechanize.new
+
+plenary_session_url = "http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_el_h2?data=14072015&nom_s=3"
+puts "Fetching plenary day: #{plenary_session_url}"
+plenary_session_page = @agent.get(plenary_session_url)
+
+# Each vote on a page has a compare button that we can extract the ID from
+vote_event_ids = plenary_session_page.search("[title='Порівняти']").map do |e|
+  e.attr(:value)
+end
+
+puts "Found #{vote_event_ids.count} vote events to scrape..."
+vote_event_ids.each do |id|
+  scrape_vote_event id
+end
