@@ -94,8 +94,6 @@ def scrape_vote_event(vote_event_id)
     puts "Saving votes for faction: #{faction_name}"
     faction.search(:li).each do |li|
       voter_name = li.at(".dep").text.gsub("’", "'")
-      puts "Saving vote by #{voter_name}..."
-
       voter_id = name_to_id(voter_name, faction_name)
 
       vote = {
