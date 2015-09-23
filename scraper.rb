@@ -126,4 +126,9 @@ end
 
 @agent = Mechanize.new
 
-scrape_sitting_date(Date.new(2015, 07, 14))
+most_recent_votes_date = Date.parse(ScraperWiki.select("start_date FROM vote_events ORDER BY start_date DESC LIMIT 1").first["start_date"])
+
+(most_recent_votes_date..Date.today).each do |date|
+  puts "Checking for votes on: #{date}"
+  scrape_sitting_date(date)
+end
