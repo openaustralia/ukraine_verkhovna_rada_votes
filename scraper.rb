@@ -79,7 +79,8 @@ vote_event = {
   identifier: vote_event_id,
   title: vote_event_page.at(".head_gol font").text.strip,
   start_date: DateTime.parse(vote_event_page.at(".head_gol").search(:br).first.next.text),
-  result: ukrainian_result_to_popolo(vote_event_page.search(".head_gol font").last.text)
+  result: ukrainian_result_to_popolo(vote_event_page.search(".head_gol font").last.text),
+  source_url: vote_event_url
 }
 ScraperWiki::save_sqlite([:identifier], vote_event, :vote_events)
 
