@@ -108,18 +108,22 @@ def scrape_vote_event(vote_event_id)
   ScraperWiki::sqliteexecute("COMMIT")
 end
 
+def scrape_sitting_date(date)
+  plenary_session_url = "http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_el_h2?data=#{date.strftime('%d%m%Y')}&nom_s=3"
+  puts "Fetching plenary day: #{plenary_session_url}"
+  plenary_session_page = @agent.get(plenary_session_url)
+
+  # Each vote on a page has a compare button that we can extract the ID from
+  vote_event_ids = plenary_session_page.search("[title='Порівняти']").map do |e|
+    e.attr(:value)
+  end
+
+  puts "Found #{vote_event_ids.count} vote events to scrape..."
+  vote_event_ids.each do |id|
+    scrape_vote_event id
+  end
+end
+
 @agent = Mechanize.new
 
-plenary_session_url = "http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_el_h2?data=14072015&nom_s=3"
-puts "Fetching plenary day: #{plenary_session_url}"
-plenary_session_page = @agent.get(plenary_session_url)
-
-# Each vote on a page has a compare button that we can extract the ID from
-vote_event_ids = plenary_session_page.search("[title='Порівняти']").map do |e|
-  e.attr(:value)
-end
-
-puts "Found #{vote_event_ids.count} vote events to scrape..."
-vote_event_ids.each do |id|
-  scrape_vote_event id
-end
+scrape_sitting_date(Date.new(2015, 07, 14))
