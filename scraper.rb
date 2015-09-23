@@ -5,6 +5,11 @@ require 'json'
 
 # Convert Ukrainian vote string to Popolo vote option string
 def ukrainian_vote_to_popolo_option(string)
+  # This can denote the deputy asked for their vote to be changed
+  # TODO: Do we need to do something with this information?
+  # e.g. http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_golos?g_id=3107
+  string.chomp!("*")
+
   case string
   when "За"
     "yes"
