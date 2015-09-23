@@ -4,7 +4,7 @@ require 'open-uri'
 require 'json'
 
 # Convert Ukrainian vote string to Popolo vote option string
-def ua_vote_to_popolo_option(string)
+def ukrainian_vote_to_popolo_option(string)
   case string
   when "За"
     "yes"
@@ -21,7 +21,7 @@ def ua_vote_to_popolo_option(string)
   end
 end
 
-def ua_result_to_popolo(string)
+def ukrainian_result_to_popolo(string)
   case string
   when "Рішення прийнято"
     "pass"
@@ -79,7 +79,7 @@ vote_event = {
   identifier: vote_event_id,
   title: vote_event_page.at(".head_gol font").text.strip,
   start_date: DateTime.parse(vote_event_page.at(".head_gol").search(:br).first.next.text),
-  result: ua_result_to_popolo(vote_event_page.search(".head_gol font").last.text)
+  result: ukrainian_result_to_popolo(vote_event_page.search(".head_gol font").last.text)
 }
 ScraperWiki::save_sqlite([:identifier], vote_event, :vote_events)
 
@@ -97,7 +97,7 @@ vote_event_page.search("#01 ul.fr > li").each do |faction|
     vote = {
       vote_event_id: vote_event_id,
       voter_id: voter_id,
-      option: ua_vote_to_popolo_option(li.at(".golos").text)
+      option: ukrainian_vote_to_popolo_option(li.at(".golos").text)
     }
     ScraperWiki::save_sqlite([:vote_event_id, :voter_id], vote, :votes)
   end
