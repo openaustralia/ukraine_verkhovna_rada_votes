@@ -92,17 +92,17 @@ def scrape_vote_event(vote_event_id)
     faction_name = faction.at(:b).inner_text
 
     puts "Saving votes for faction: #{faction_name}"
-    faction.search(:li).each do |li|
+    votes = faction.search(:li).map do |li|
       voter_name = li.at(".dep").text.gsub("’", "'")
       voter_id = name_to_id(voter_name, faction_name)
 
-      vote = {
+      {
         vote_event_id: vote_event_id,
         voter_id: voter_id,
         option: ukrainian_vote_to_popolo_option(li.at(".golos").text)
       }
-      ScraperWiki::save_sqlite([:vote_event_id, :voter_id], vote, :votes)
     end
+    ScraperWiki::save_sqlite([:vote_event_id, :voter_id], votes, :votes)
   end
 
   ScraperWiki::sqliteexecute("COMMIT")
