@@ -68,7 +68,7 @@ def name_to_id(abbreviated_name, faction_name)
   end
 end
 
-def scrape_vote_event(vote_event_id)
+def scrape_vote_event(vote_event_id, bill)
   ScraperWiki::sqliteexecute("BEGIN TRANSACTION")
 
   base_url = "http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_golos?g_id="
@@ -86,6 +86,9 @@ def scrape_vote_event(vote_event_id)
     source_url: vote_event_url
   }
   ScraperWiki::save_sqlite([:identifier], vote_event, :vote_events)
+  if bill.any?
+    ScraperWiki::save_sqlite([:official_id, :vote_event_id], bill.merge(vote_event_id: vote_event[:identifier]), :bills)
+  end
 
   # Vote results by faction
   vote_event_page.search("#01 ul.fr > li").each do |faction|
@@ -113,14 +116,19 @@ def scrape_sitting_date(date)
   puts "Fetching plenary day: #{plenary_session_url}"
   plenary_session_page = @agent.get(plenary_session_url)
 
-  # Each vote on a page has a compare button that we can extract the ID from
-  vote_event_ids = plenary_session_page.search("[title='Порівняти']").map do |e|
-    e.attr(:value)
+  vote_events = []
+  bill = {}
+
+  plenary_session_page.search("table.tab_1 tr").each do |tr|
+    if tr.at("[title='Порівняти']")
+      vote_events << {id: tr.at("[title='Порівняти']").attr(:value), bill: bill}
+    end
+    # TODO: Save bill details
   end
 
-  puts "Found #{vote_event_ids.count} vote events to scrape..."
-  vote_event_ids.each do |id|
-    scrape_vote_event id
+  puts "Found #{vote_events.count} vote events to scrape..."
+  vote_events.each do |vote_event|
+    scrape_vote_event(vote_event[:id], vote_event[:bill])
   end
 end
 
