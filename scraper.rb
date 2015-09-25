@@ -121,9 +121,19 @@ def scrape_sitting_date(date)
 
   plenary_session_page.search("table.tab_1 tr").each do |tr|
     if tr.at("[title='Порівняти']")
+      # A vote
       vote_events << {id: tr.at("[title='Порівняти']").attr(:value), bill: bill}
+    elsif tr.search(:td).count == 1
+      # A normal speech heading
+      bill = {}
+    elsif tr.search(:td).count == 3 && tr.at("td center b")
+      # A bill heading
+      bill = {
+        official_id: tr.at("td center b").text,
+        title: tr.search("td")[1].text,
+        url: "http://w1.c1.rada.gov.ua" + tr.at(:a).attr(:href)
+      }
     end
-    # TODO: Save bill details
   end
 
   puts "Found #{vote_events.count} vote events to scrape..."
