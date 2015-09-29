@@ -142,19 +142,28 @@ def scrape_sitting_date(date)
   end
 end
 
-@agent = Mechanize.new
+def dates_to_parse
+  # Only parse a single date - useful for debugging
+  return [Date.parse(ENV["MORPH_ONLY_PARSE_DATE"])] if ENV["MORPH_ONLY_PARSE_DATE"]
 
-start_date = if ENV["MORPH_START_DATE"]
-  Date.parse(ENV["MORPH_START_DATE"])
-else
-  begin
-    Date.parse(ScraperWiki.select("start_date FROM vote_events ORDER BY start_date DESC LIMIT 1").first["start_date"])
-  rescue SqliteMagic::NoSuchTable
-    raise "No scraped votes found. Set MORPH_START_DATE to tell me what date to start scraping from."
+  start_date = if ENV["MORPH_START_DATE"]
+    # Start parsing from a specific date
+    Date.parse(ENV["MORPH_START_DATE"])
+  else
+    # Normal operation - start parsing from the most recent date in the database
+    begin
+      Date.parse(ScraperWiki.select("start_date FROM vote_events ORDER BY start_date DESC LIMIT 1").first["start_date"])
+    rescue SqliteMagic::NoSuchTable
+      raise "No scraped votes found. Set MORPH_START_DATE to tell me what date to start scraping from."
+    end
   end
+
+  (start_date..Date.today)
 end
 
-(start_date..Date.today).each do |date|
+@agent = Mechanize.new
+
+dates_to_parse.each do |date|
   puts "Checking for votes on: #{date}"
   scrape_sitting_date(date)
 end
