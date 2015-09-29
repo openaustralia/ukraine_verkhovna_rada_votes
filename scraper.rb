@@ -68,7 +68,7 @@ def name_to_id(abbreviated_name, faction_name)
   end
 end
 
-def scrape_vote_event(vote_event_id, bill)
+def scrape_vote_event(vote_event_id, bill, debate_url)
   ScraperWiki::sqliteexecute("BEGIN TRANSACTION")
 
   base_url = "http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_golos?g_id="
@@ -83,7 +83,8 @@ def scrape_vote_event(vote_event_id, bill)
     title: vote_event_page.at(".head_gol font").text.strip,
     start_date: DateTime.parse(vote_event_page.at(".head_gol").search(:br).first.next.text),
     result: ukrainian_result_to_popolo(vote_event_page.search(".head_gol font").last.text),
-    source_url: vote_event_url
+    source_url: vote_event_url,
+    debate_url: debate_url
   }
   ScraperWiki::save_sqlite([:identifier], vote_event, :vote_events)
   if bill.any?
@@ -138,7 +139,7 @@ def scrape_sitting_date(date)
 
   puts "Found #{vote_events.count} vote events to scrape..."
   vote_events.each do |vote_event|
-    scrape_vote_event(vote_event[:id], vote_event[:bill])
+    scrape_vote_event(vote_event[:id], vote_event[:bill], plenary_session_url)
   end
 end
 
