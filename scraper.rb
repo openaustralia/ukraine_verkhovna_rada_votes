@@ -77,8 +77,7 @@ def scrape_vote_event(vote_event_id, bill, debate_url)
   vote_event_page = @agent.get(vote_event_url)
 
   vote_event = {
-    # Setting this to what EveryPolitician is generating. Maybe it's wrong?
-    organization_id: "legislature",
+    organization_id: "rada",
     identifier: vote_event_id,
     title: vote_event_page.at(".head_gol font").text.strip,
     start_date: DateTime.parse(vote_event_page.at(".head_gol").search(:br).first.next.text),
