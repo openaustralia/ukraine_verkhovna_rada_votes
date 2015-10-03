@@ -70,9 +70,11 @@ end
 
 # Finds a speech in `div` that started at `timestamp`
 def find_speech(div, timestamp)
-  p = div.search(:p).find { |p| p.text[/^\s+#{timestamp}/] }
-
-  p ? p.text.strip : puts("Could not find speech at timestamp: #{timestamp}")
+  if p = div.search(:p).find { |p| p.text[/^\s+#{timestamp}/] }
+    p.text[/^\s+#{timestamp}(.*)/m, 1].strip
+  else
+    puts "Could not find speech at timestamp: #{timestamp}"
+  end
 end
 
 def scrape_vote_event(data, debate_url)
