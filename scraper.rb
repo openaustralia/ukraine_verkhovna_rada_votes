@@ -89,15 +89,19 @@ def scrape_vote_event(data, debate_url)
   puts "Fetching vote event page: #{vote_event_url}"
   vote_event_page = @agent.get(vote_event_url)
 
+  date_time = DateTime.parse(vote_event_page.at(".head_gol").search(:br).first.next.text)
+
   vote_event = {
     organization_id: "rada",
     identifier: vote_event_id,
     title: vote_event_page.at(".head_gol font").text.strip,
-    start_date: DateTime.parse(vote_event_page.at(".head_gol").search(:br).first.next.text),
+    start_date: date_time,
     result: ukrainian_result_to_popolo(vote_event_page.search(".head_gol font").last.text),
     source_url: vote_event_url,
     debate_url: debate_url,
-    motion_text: motion_text
+    motion_text: motion_text,
+    # There's no useful ID from the parliament so just use unique date/time
+    motion_id: date_time
   }
   ScraperWiki::save_sqlite([:identifier], vote_event, :vote_events)
   if bill.any?
