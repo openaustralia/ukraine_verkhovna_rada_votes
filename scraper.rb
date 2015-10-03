@@ -70,7 +70,7 @@ end
 
 # Finds a speech in `div` that started at `timestamp`
 def find_speech(div, timestamp)
-  if p = div.search(:p).find { |p| p.text[/^\s+#{timestamp}/] }
+  if p = div.search(:p).find { |e| e.text[/^\s+#{timestamp}/] }
     p.text[/^\s+#{timestamp}(.*)/m, 1].strip
   else
     puts "Could not find speech at timestamp: #{timestamp}"
