@@ -68,20 +68,7 @@ def name_to_id(abbreviated_name, faction_name)
   end
 end
 
-# Finds a speech in `div` that started at `timestamp`
-def find_speech(div, timestamp)
-  if p = div.search(:p).find { |e| e.text[/^\s+#{timestamp}/] }
-    p.text[/^\s+#{timestamp}(.*)/m, 1].strip
-  else
-    puts "Could not find speech at timestamp: #{timestamp}"
-  end
-end
-
-def scrape_vote_event(data, debate_url)
-  vote_event_id = data[:id]
-  bill = data[:bill]
-  motion_text = data[:motion_text]
-
+def scrape_vote_event(vote_event_id, bill, debate_url)
   ScraperWiki::sqliteexecute("BEGIN TRANSACTION")
 
   base_url = "http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_golos?g_id="
@@ -89,19 +76,14 @@ def scrape_vote_event(data, debate_url)
   puts "Fetching vote event page: #{vote_event_url}"
   vote_event_page = @agent.get(vote_event_url)
 
-  date_time = DateTime.parse(vote_event_page.at(".head_gol").search(:br).first.next.text)
-
   vote_event = {
     organization_id: "rada",
     identifier: vote_event_id,
     title: vote_event_page.at(".head_gol font").text.strip,
-    start_date: date_time,
+    start_date: DateTime.parse(vote_event_page.at(".head_gol").search(:br).first.next.text),
     result: ukrainian_result_to_popolo(vote_event_page.search(".head_gol font").last.text),
     source_url: vote_event_url,
-    debate_url: debate_url,
-    motion_text: motion_text,
-    # There's no useful ID from the parliament so just use unique date/time
-    motion_id: date_time
+    debate_url: debate_url
   }
   ScraperWiki::save_sqlite([:identifier], vote_event, :vote_events)
   if bill.any?
@@ -133,21 +115,19 @@ def scrape_sitting_date(date)
   plenary_session_url = "http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_el_h2?data=#{date.strftime('%d%m%Y')}&nom_s=3"
   puts "Fetching plenary day: #{plenary_session_url}"
   plenary_session_page = @agent.get(plenary_session_url)
-  transcript = plenary_session_page.search(".sten_txt")
 
   vote_events = []
   bill = {}
 
   plenary_session_page.search("table.tab_1 tr").each do |tr|
-    # A vote
     if tr.at("[title='Порівняти']")
-      motion_text = find_speech(transcript, tr.at(:td).text)
-      vote_events << {id: tr.at("[title='Порівняти']").attr(:value), bill: bill, motion_text: motion_text}
-    # A normal speech heading
+      # A vote
+      vote_events << {id: tr.at("[title='Порівняти']").attr(:value), bill: bill}
     elsif tr.search(:td).count == 1
+      # A normal speech heading
       bill = {}
-    # A bill heading
     elsif tr.search(:td).count == 3 && tr.at("td center b")
+      # A bill heading
       bill = {
         official_id: tr.at("td center b").text,
         title: tr.search("td")[1].text,
@@ -158,7 +138,7 @@ def scrape_sitting_date(date)
 
   puts "Found #{vote_events.count} vote events to scrape..."
   vote_events.each do |vote_event|
-    scrape_vote_event(vote_event, plenary_session_url)
+    scrape_vote_event(vote_event[:id], vote_event[:bill], plenary_session_url)
   end
 end
 
