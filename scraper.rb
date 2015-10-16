@@ -60,6 +60,8 @@ def name_to_id(abbreviated_name, faction_name)
       "1792"
     when 'Фракція  Політичної партії "НАРОДНИЙ ФРОНТ"'
       "18141"
+    when "Позафракційні"
+      nil # When there's 2 people with the same name in the same faction, we just don't know
     else
       raise "Unknown faction for special case person #{abbreviated_name}: #{faction_name}"
     end
@@ -72,6 +74,21 @@ def name_to_id(abbreviated_name, faction_name)
     else
       raise "Person ID not found for: #{abbreviated_name}"
     end
+  end
+end
+
+# This handles the situation where there are 2 people with
+# the same name in the same "faction" (actually it's when
+# they don't yet have a faction)
+def check_votes_for_exceptions(votes)
+  if votes.select { |v| v[:voter_id].nil? }
+    exception_ids = ["1792", "18141"]
+    votes.map! do |v|
+      v[:voter_id] = exception_ids.pop if v[:voter_id].nil?
+      v
+    end
+  else
+    votes
   end
 end
 
@@ -112,6 +129,10 @@ def scrape_vote_event(vote_event_id, bill, debate_url)
         option: ukrainian_vote_to_popolo_option(li.at(".golos").text)
       }
     end
+
+    # Check for exceptions if this is the "independent" faction
+    votes = check_votes_for_exceptions(votes) if faction_name == "Позафракційні"
+
     ScraperWiki::save_sqlite([:vote_event_id, :voter_id], votes, :votes)
   end
 
