@@ -53,7 +53,8 @@ end
 def name_to_id(abbreviated_name, faction_name)
   # Special case for 2 people with the same abbreviated name
   # TODO: Remove this hardcoded exception
-  if abbreviated_name == "Тимошенко Ю.В."
+  case abbreviated_name
+  when "Тимошенко Ю.В."
     case faction_name
     when 'Фракція політичної партії "Всеукраїнське об’єднання "Батьківщина"'
       "1792"
@@ -62,6 +63,8 @@ def name_to_id(abbreviated_name, faction_name)
     else
       raise "Unknown faction for special case person #{abbreviated_name}: #{faction_name}"
     end
+  when "Бордюг І.Л."
+    "18040"
   else
     @name_ids ||= morph_scraper_query("openaustralia/ukraine_verkhovna_rada_deputies", "select name, id from 'data'")
     if deputy = @name_ids.find { |r| full_name_to_abbreviated(r["name"]) == abbreviated_name }
