@@ -64,7 +64,11 @@ def name_to_id(abbreviated_name, faction_name)
     end
   else
     @name_ids ||= morph_scraper_query("openaustralia/ukraine_verkhovna_rada_deputies", "select name, id from 'data'")
-    @name_ids.find { |r| full_name_to_abbreviated(r["name"]) == abbreviated_name }["id"]
+    if deputy = @name_ids.find { |r| full_name_to_abbreviated(r["name"]) == abbreviated_name }
+      deputy["id"]
+    else
+      raise "Person ID not found for: #{abbreviated_name}"
+    end
   end
 end
 
