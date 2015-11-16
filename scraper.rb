@@ -178,9 +178,9 @@ def dates_to_parse
     # Start parsing from a specific date
     Date.parse(ENV["MORPH_START_DATE"])
   else
-    # Normal operation - start parsing from the most recent date in the database
+    # Normal operation - start parsing from the day after the most recent date in the database
     begin
-      Date.parse(ScraperWiki.select("start_date FROM vote_events ORDER BY start_date DESC LIMIT 1").first["start_date"])
+      Date.parse(ScraperWiki.select("start_date FROM vote_events ORDER BY start_date DESC LIMIT 1").first["start_date"]) + 1
     rescue SqliteMagic::NoSuchTable
       raise "No scraped votes found. Set MORPH_START_DATE to tell me what date to start scraping from."
     end
