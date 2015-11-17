@@ -127,6 +127,7 @@ def scrape_vote_event(vote_event_id, bill, debate_url)
   # Vote results by faction
   vote_event_page.search("#01 ul.fr > li").each do |faction|
     faction_name = faction.at(:b).inner_text.squeeze(" ")
+    faction_id = faction_name_to_id(faction_name)
 
     puts "Saving votes for faction: #{faction_name}"
     votes = faction.search(:li).map do |li|
@@ -136,6 +137,7 @@ def scrape_vote_event(vote_event_id, bill, debate_url)
       {
         vote_event_id: vote_event_id,
         voter_id: voter_id,
+        group_id: faction_id,
         option: ukrainian_vote_to_popolo_option(li.at(".golos").text)
       }
     end
