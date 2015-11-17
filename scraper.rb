@@ -56,7 +56,7 @@ def person_name_to_id(abbreviated_name, faction_name)
   case abbreviated_name
   when "Тимошенко Ю.В."
     case faction_name
-    when 'Фракція політичної партії "Всеукраїнське об’єднання "Батьківщина"'
+    when 'Фракція політичної партії "Всеукраїнське об\'єднання "Батьківщина"'
       "1792"
     when 'Фракція Політичної партії "НАРОДНИЙ ФРОНТ"'
       "18141"
@@ -126,7 +126,7 @@ def scrape_vote_event(vote_event_id, bill, debate_url)
 
   # Vote results by faction
   vote_event_page.search("#01 ul.fr > li").each do |faction|
-    faction_name = faction.at(:b).inner_text.squeeze(" ")
+    faction_name = faction.at(:b).inner_text.gsub("’", "'").squeeze(" ")
     faction_id = faction_name_to_id(faction_name)
 
     puts "Saving votes for faction: #{faction_name}"
