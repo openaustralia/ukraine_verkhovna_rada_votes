@@ -80,7 +80,7 @@ end
 def faction_name_to_id(name)
   @factions ||= morph_scraper_query("openaustralia/ukraine_verkhovna_rada_deputies",
                                     "SELECT DISTINCT COALESCE(faction_id, 'party/Позафракційні') AS faction_id, COALESCE(faction, 'Позафракційні') AS faction FROM 'data'")
-  if faction = @factions.find { |f| f["faction"] == name }
+  if faction = @factions.find { |f| f["faction"].include? name }
     faction["faction_id"]
   else
     raise "Faction ID not found for: #{name}"
