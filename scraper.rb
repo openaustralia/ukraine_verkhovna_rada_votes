@@ -50,7 +50,7 @@ def full_name_to_abbreviated(full_name)
   "#{parts[0]} #{parts[1][0]}.#{last_initial}."
 end
 
-def name_to_id(abbreviated_name, faction_name)
+def person_name_to_id(abbreviated_name, faction_name)
   # Special case for 2 people with the same abbreviated name
   # TODO: Remove this hardcoded exception
   case abbreviated_name
@@ -121,7 +121,7 @@ def scrape_vote_event(vote_event_id, bill, debate_url)
     puts "Saving votes for faction: #{faction_name}"
     votes = faction.search(:li).map do |li|
       voter_name = li.at(".dep").text.gsub("’", "'")
-      voter_id = name_to_id(voter_name, faction_name)
+      voter_id = person_name_to_id(voter_name, faction_name)
 
       {
         vote_event_id: vote_event_id,
