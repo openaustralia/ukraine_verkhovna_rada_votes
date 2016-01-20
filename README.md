@@ -4,6 +4,18 @@ This is [a scraper that runs on morph.io](https://morph.io/openaustralia/ukraine
 
 It saves data to morph.io in a flat format that can be converted easily into [Popolo](http://www.popoloproject.com/). You can use the little Sinatra proxy, [morph_popolo](https://github.com/openaustralia/morph_popolo) to do exactly that.
 
+## Choosing which days to scrape
+
+This scraper is designed to run automatically each day. It checks the most recent data in the database and tries to scrape all dates up until the present day.
+
+If you'd like to scrape a different day, perhaps because of a problem scraping a particular date, you can set environment variables to tell the scraper what days to scrape.
+
+`MORPH_ONLY_PARSE_DATE`: Set this to a date, e.g. "2016-01-20", to only scrape a specific day. Useful if you're debugging a problem scraping that day.
+
+`MORPH_START_DATE`: Set this to a date, e.g. "2016-01-20", to scrape every day from that date until the present day. Useful if you're backfilling data in the scraper.
+
+These can be set in the [morph.io Settings for this scraper](https://morph.io/openaustralia/ukraine_verkhovna_rada_votes/settings). Don't forget to remove them when you're done so the scraper goes back to working how it usually does.
+
 ## Helpful URLs
 
 All these URLs have obvious IDs you can change to get other pages:
