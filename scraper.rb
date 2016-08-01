@@ -197,8 +197,8 @@ def dates_to_parse
       raise "No scraped votes found. Set MORPH_START_DATE to tell me what date to start scraping from."
     end
   end
-
-  (start_date..Date.today)
+  end_date = Date.today-1
+  (start_date..end_date)
 end
 
 @agent = Mechanize.new
