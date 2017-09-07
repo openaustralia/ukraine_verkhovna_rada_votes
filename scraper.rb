@@ -155,7 +155,7 @@ def scrape_sitting_date(date)
   plenary_session_url = "http://w1.c1.rada.gov.ua/pls/radan_gs09/ns_el_h2?data=#{date.strftime('%d%m%Y')}&nom_s=3"
   puts "Fetching plenary day: #{plenary_session_url}"
   plenary_session_page = @agent.get(plenary_session_url)
-
+  plenary_session_page.encoding = 'windows-1251'
   vote_events = []
   bill = {}
 
